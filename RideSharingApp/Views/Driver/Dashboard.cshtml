@@ -1,0 +1,32 @@
+﻿@model List<dynamic>
+@{
+    ViewData["Title"] = "Driver Dashboard";
+}
+<h2>Driver Dashboard</h2>
+<h3>Available Rides</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Booking ID</th>
+            <th>Pickup</th>
+            <th>Dropoff</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var booking in Model)
+        {
+            <tr>
+                <td>@booking.BookingID</td>
+                <td>@booking.Pickup</td>
+                <td>@booking.Dropoff</td>
+                <td>
+                    <form asp-action="AcceptRide" method="post">
+                        <input type="hidden" name="bookingId" value="@booking.BookingID" />
+                        <button type="submit" class="btn btn-success">Accept</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
