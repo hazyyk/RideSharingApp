@@ -1,0 +1,67 @@
+﻿@model RideSharingApp.Models.RideBooking
+
+@{
+    ViewData["Title"] = "Track Your Ride";
+}
+
+<h2>Track Your Ride @Model.BookingID</h2>
+
+<p><strong>Driver:</strong> @Model.Driver?.Name ?? "Not Assigned Yet"</p>
+
+<div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+
+<button id="finishBtn" class="btn btn-primary" @(Model.Status != "Accepted" ? "disabled" : "")>Finish Ride</button>
+
+@section Scripts {
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        var map = L.map('map').setView([10.7769, 106.7009], 13); // default to Ho Chi Minh city
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data © OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Show pickup and dropoff markers
+        var pickupLat = @Model.PickupLocation.Latitude;
+        var pickupLon = @Model.PickupLocation.Longitude;
+        var dropLat = @Model.DropoffLocation.Latitude;
+        var dropLon = @Model.DropoffLocation.Longitude;
+
+        var pickupMarker = L.marker([pickupLat, pickupLon]).addTo(map).bindPopup("Pickup Location").openPopup();
+        var dropoffMarker = L.marker([dropLat, dropLon]).addTo(map).bindPopup("Dropoff Location");
+
+        // Driver marker (updated in real-time)
+        var driverMarker = null;
+
+        // SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/rideTrackingHub")
+            .build();
+
+        connection.start().then(() => {
+            console.log("Connected to rideTrackingHub");
+
+            // Join booking group to receive updates
+            connection.invoke("JoinBookingGroup", '@Model.BookingID');
+        }).catch(err => console.error(err.toString()));
+
+        // Receive driver location update
+        connection.on("ReceiveDriverLocation", function (lat, lon) {
+            if (driverMarker) {
+                driverMarker.setLatLng([lat, lon]);
+         body: JSON.stringify({ bookingId: '@Model.BookingID' })
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/PaymentFeedback/Process?bookingId=@Model.BookingID';
+                } else {
+                    alert("Failed to finish ride.");
+                }
+            });
+        });
+    </script>
+}

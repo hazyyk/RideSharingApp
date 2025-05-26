@@ -22,7 +22,8 @@
                 <td>@booking.Pickup</td>
                 <td>@booking.Dropoff</td>
                 <td>
-                    <form asp-action="AcceptRide" method="post">
+                    <form asp-controller="Driver" asp-action="AcceptRide" method="post">
+                        
                         <input type="hidden" name="bookingId" value="@booking.BookingID" />
                         <button type="submit" class="btn btn-success">Accept</button>
                     </form>

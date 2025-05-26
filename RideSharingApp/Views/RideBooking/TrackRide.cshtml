@@ -1,0 +1,59 @@
+﻿@model RideSharingApp.Models.RideBooking
+
+@{
+    ViewData["Title"] = "Track Ride";
+    var pickupLat = Model.PickupLocation?.Latitude ?? 0;
+    var pickupLng = Model.PickupLocation?.Longitude ?? 0;
+    var dropoffLat = Model.DropoffLocation?.Latitude ?? 0;
+    var dropoffLng = Model.DropoffLocation?.Longitude ?? 0;
+
+    // TEMP: Simulate driver location (replace with real-time location later)
+    var driverLat = pickupLat + 0.005;
+    var driverLng = pickupLng + 0.005;
+}
+
+<h2>Track Ride</h2>
+<div id="map" style="height: 500px;"></div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/graphhopper-js-api-client/dist/graphhopper-client.js"></script>
+
+    <script>
+        const map = L.map('map').setView([@driverLat, @driverLng], 14);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        const pickup = L.marker([@pickupLat, @pickupLng]).addTo(map).bindPopup("Pickup").openPopup();
+        const dropoff = L.marker([@dropoffLat, @dropoffLng]).addTo(map).bindPopup("Dropoff");
+        const driver = L.marker([@driverLat, @driverLng]).addTo(map).bindPopup("Driver");
+
+        const ghRouting = new GraphHopper.Routing({
+            key: '29f7be32-d45d-47cb-a324-d5f481781715',
+            vehicle: 'car',
+            elevation: false,
+            optimize: false
+        });
+
+        ghRouting.addPoint(new GHInput(@driverLat, @driverLng));
+        ghRouting.addPoint(new GHInput(@pickupLat, @pickupLng));
+
+        ghRouting.doRequest()
+            .then(function (json) {
+                const path = json.paths[0];
+                const geojson = {
+                    "type": "Feature",
+                    "geometry": path.points
+                };
+                L.geoJSON(geojson, {
+                    style: { color: "blue", weight: 5 }
+                }).addTo(map);
+            })
+            .catch(function (err) {
+                console.error(err.message);
+            });
+    </script>
+}

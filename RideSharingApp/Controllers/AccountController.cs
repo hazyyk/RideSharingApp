@@ -33,45 +33,57 @@ namespace RideSharingApp.Controllers
             {
                 var user = new IdentityUser { UserName = model.Email, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
+
                 if (result.Succeeded)
                 {
-                    var customer = new Customer
-                    {
-                        CustomerID = Guid.NewGuid().ToString(),
-                        Name = model.Name,
-                        Email = model.Email,
-                        PhoneNumber = model.PhoneNumber
-                    };
-                    _context.Customers.Add(customer);
-                    await _context.SaveChangesAsync();
-
                     if (model.IsDriver)
                     {
+                        await _userManager.AddToRoleAsync(user, "Driver");
+
                         var vehicle = new Vehicle
                         {
+                            VehicleID = Guid.NewGuid().ToString(),
                             Model = model.VehicleModel ?? "Unknown",
                             Type = model.VehicleType ?? "Unknown",
                             LicensePlate = model.LicensePlate ?? "Unknown",
                             Capacity = model.Capacity ?? 4
                         };
                         _context.Vehicles.Add(vehicle);
-                        await _context.SaveChangesAsync(); // Save to get VehicleID
+                        await _context.SaveChangesAsync();
 
                         var driver = new Driver
                         {
                             DriverID = Guid.NewGuid().ToString(),
                             Name = model.Name,
+                            Email = model.Email,               // Set email here
                             PhoneNumber = model.PhoneNumber,
                             LicenseNumber = model.LicenseNumber ?? "Pending",
-                            VehicleID = vehicle.VehicleID
+                            VehicleID = vehicle.VehicleID,
+                            IdentityUserId = user.Id           // Link driver to Identity user
                         };
                         _context.Drivers.Add(driver);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user, "Customer");
+
+                        var customer = new Customer
+                        {
+                            CustomerID = Guid.NewGuid().ToString(),
+                            Name = model.Name,
+                            Email = model.Email,
+                            PhoneNumber = model.PhoneNumber,
+                            IdentityUserId = user.Id          // Link customer to Identity user
+                        };
+                        _context.Customers.Add(customer);
                         await _context.SaveChangesAsync();
                     }
 
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return RedirectToAction("Index", "Home");
                 }
+
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);

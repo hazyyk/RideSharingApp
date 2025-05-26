@@ -12,6 +12,8 @@ namespace RideSharingApp.Models
         [EmailAddress]
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
+
+        public string IdentityUserId { get; set; } = string.Empty;
         public virtual ICollection<RideBooking> RideBookings { get; set; } = new List<RideBooking>();
         public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
     }

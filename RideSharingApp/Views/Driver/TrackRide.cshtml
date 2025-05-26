@@ -1,0 +1,57 @@
+﻿@model RideSharingApp.Models.RideBooking
+
+@{
+    ViewData["Title"] = "Track Ride";
+}
+
+<h2>Tracking Ride @Model.BookingID</h2>
+
+<p>Send your current location to the customer.</p>
+
+<div id="status"></div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+
+    <script>
+        const bookingId = '@Model.BookingID';
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/rideTrackingHub")
+            .build();
+
+        connection.start().then(() => {
+            document.getElementById('status').innerText = "Connected to ride tracking hub.";
+
+            // Join booking group so customer receives driver updates
+            connection.invoke("JoinBookingGroup", bookingId);
+        }).catch(err => console.error(err.toString()));
+
+        function sendLocation(lat, lon) {
+            connection.invoke("UpdateDriverLocation", bookingId, lat, lon)
+                .catch(err => console.error(err.toString()));
+        }
+
+        // Use Geolocation API to send location every 5 seconds
+        function startSendingLocation() {
+            if (!navigator.geolocation) {
+                alert("Geolocation not supported.");
+                return;
+            }
+
+            navigator.geolocation.watchPosition(position => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                sendLocation(lat, lon);
+                document.getElementById('status').innerText = `Location sent: ${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+            }, err => {
+                console.error("Geolocation error: ", err.message);
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 5000,
+                timeout: 5000
+            });
+        }
+
+        startSendingLocation();
+    </script>
+}

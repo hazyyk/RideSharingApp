@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RideSharingApp.Data;
 
@@ -11,9 +12,11 @@ using RideSharingApp.Data;
 namespace RideSharingApp.Migrations
 {
     [DbContext(typeof(RideSharingDbContext))]
-    partial class RideSharingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250526205522_AddEmailToIdentity")]
+    partial class AddEmailToIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

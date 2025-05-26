@@ -23,7 +23,7 @@ namespace RideSharingApp.Controllers
         [HttpGet]
         public IActionResult Book()
         {
-            return View();
+            return View(new RideBookingViewModel());
         }
 
         [HttpPost]
@@ -120,5 +120,43 @@ namespace RideSharingApp.Controllers
             }
             return View("Book", model);
         }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult Track(string bookingId)
+        {
+            var booking = _context.RideBookings
+                .Include(b => b.Driver)
+                .Include(b => b.PickupLocation)
+                .Include(b => b.DropoffLocation)
+                .FirstOrDefault(b => b.BookingID == bookingId);
+
+            if (booking == null)
+                return NotFound();
+
+            return View(booking);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> FinishRide([FromBody] FinishRideRequest request)
+        {
+            var booking = await _context.RideBookings.FirstOrDefaultAsync(b => b.BookingID == request.BookingId);
+            if (booking == null) return NotFound();
+
+            booking.Status = "Completed";
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        public class FinishRideRequest
+        {
+            public string BookingId { get; set; }
+        }
+
+
+
+
     }
 }

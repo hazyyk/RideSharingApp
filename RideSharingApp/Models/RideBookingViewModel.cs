@@ -12,5 +12,7 @@ namespace RideSharingApp.Models
         public string DropoffAddress { get; set; } = string.Empty;
         public double DropoffLatitude { get; set; }
         public double DropoffLongitude { get; set; }
+
+         // public string BookingID { get; set; }
     }
 }
