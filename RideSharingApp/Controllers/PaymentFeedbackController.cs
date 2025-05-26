@@ -3,8 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using RideSharingApp.Data;
 using RideSharingApp.Models;
 using System;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace RideSharingApp.Controllers
 {
@@ -19,9 +20,29 @@ namespace RideSharingApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Process(string bookingId)
+        public async Task<IActionResult> Process(string bookingId)
         {
-            var model = new PaymentViewModel { BookingID = bookingId };
+            if (string.IsNullOrEmpty(bookingId))
+            {
+                return BadRequest("Booking ID is required.");
+            }
+
+            var booking = await _context.RideBookings
+                .Include(b => b.Payment)
+                .FirstOrDefaultAsync(b => b.BookingID == bookingId);
+
+            if (booking == null || booking.Payment == null)
+            {
+                return NotFound("Booking or payment not found.");
+            }
+
+            var model = new PaymentViewModel
+            {
+                BookingID = bookingId,
+                Amount = booking.Payment.Amount,
+                PaymentDate = booking.Payment.PaymentDate,
+                PaymentID = booking.Payment.PaymentID
+            };
             return View(model);
         }
 
@@ -30,23 +51,39 @@ namespace RideSharingApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                var payment = new Payment
+                if (!model.ConfirmPayment)
+                {
+                    ModelState.AddModelError("ConfirmPayment", "You must confirm the payment.");
+                    return View(model);
+                }
+
+                var booking = await _context.RideBookings
+                    .Include(b => b.Payment)
+                    .FirstOrDefaultAsync(b => b.BookingID == model.BookingID);
+
+                if (booking == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Booking not found.");
+                    return View(model);
+                }
+
+                // Update the Payment record with the confirmed amount (if editable, use model.Amount; otherwise, keep original)
+                var payment = booking.Payment ?? new Payment
                 {
                     PaymentID = Guid.NewGuid().ToString(),
-                    Amount = model.Amount,
                     PaymentDate = DateTime.Now
                 };
-
-                var booking = _context.RideBookings.FirstOrDefault(b => b.BookingID == model.BookingID);
-                if (booking != null)
+                payment.Amount = model.Amount > 0 ? model.Amount : booking.Payment.Amount; // Use submitted amount if valid, else original
+                if (booking.Payment == null)
                 {
-                    booking.PaymentID = payment.PaymentID;
-                    booking.Status = "Completed";
                     _context.Payments.Add(payment);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction("Feedback", new { bookingId = model.BookingID });
+                    booking.PaymentID = payment.PaymentID;
                 }
-                ModelState.AddModelError(string.Empty, "Booking not found.");
+
+                booking.Status = "Completed";
+                await _context.SaveChangesAsync();
+
+                return RedirectToAction("Feedback", new { bookingId = model.BookingID });
             }
             return View(model);
         }
