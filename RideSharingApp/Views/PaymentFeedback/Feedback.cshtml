@@ -1,24 +1,94 @@
 ﻿@model RideSharingApp.Models.FeedbackViewModel
+
 @{
     ViewData["Title"] = "Submit Feedback";
 }
+
 <h2>Submit Feedback</h2>
+
 <form asp-action="Feedback" method="post">
     <input type="hidden" asp-for="BookingID" />
     <div asp-validation-summary="All" class="text-danger"></div>
     <div class="form-group">
-        <label asp-for="Rating" class="control-label"></label>
-        <input asp-for="Rating" class="form-control" type="number" min="1" max="5" />
+        <label class="control-label">Rating</label>
+        <div class="star-rating" id="starRating">
+            @for (int i = 5; i >= 1; i--)
+            {
+                <input type="radio" id="star@(i)" name="Rating" value="@(i)" @(Model.Rating == i ? "checked" : "") required />
+                <label for="star@(i)" title="@(i) star@(i > 1 ? "s" : "")">★</label>
+            }
+        </div>
         <span asp-validation-for="Rating" class="text-danger"></span>
     </div>
+
     <div class="form-group">
         <label asp-for="Comments" class="control-label"></label>
         <textarea asp-for="Comments" class="form-control"></textarea>
     </div>
+
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Submit Feedback</button>
     </div>
 </form>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <style>
+        .star-rating {
+            display: inline-flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+
+            .star-rating input[type="radio"] {
+                display: none;
+            }
+
+            .star-rating label {
+                font-size: 2rem;
+                color: #ccc;
+                cursor: pointer;
+                transition: color 0.2s;
+            }
+
+                .star-rating label:hover,
+                .star-rating label:hover ~ label {
+                    color: gold;
+                }
+
+            .star-rating input[type="radio"]:checked ~ label {
+                color: gold;
+            }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const starRating = document.getElementById("starRating");
+            const stars = starRating.querySelectorAll("input[type='radio']");
+            const labels = starRating.querySelectorAll("label");
+
+            // Initialize the star display based on the checked value
+            updateStars();
+
+            // Add click event to each star
+            stars.forEach(star => {
+                star.addEventListener("change", function () {
+                    updateStars();
+                });
+            });
+
+            function updateStars() {
+                const checkedStar = starRating.querySelector("input[type='radio']:checked");
+                const checkedValue = checkedStar ? parseInt(checkedStar.value) : 0;
+
+                labels.forEach((label, index) => {
+                    const starValue = parseInt(label.getAttribute("for").replace("star", ""));
+                    if (starValue <= checkedValue) {
+                        label.style.color = "gold";
+                    } else {
+                        label.style.color = "#ccc";
+                    }
+                });
+            }
+        });
+    </script>
 }

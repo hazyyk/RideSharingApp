@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace RideSharingApp.Controllers
 {
@@ -43,6 +44,12 @@ namespace RideSharingApp.Controllers
                 PaymentDate = booking.Payment.PaymentDate,
                 PaymentID = booking.Payment.PaymentID
             };
+
+            ViewBag.PaymentMethods = new SelectList(new[]
+            {
+                    "Bank Transfer", "Credit Card", "MoMo", "ZaloPay"
+                });
+
             return View(model);
         }
 
@@ -85,6 +92,12 @@ namespace RideSharingApp.Controllers
 
                 return RedirectToAction("Feedback", new { bookingId = model.BookingID });
             }
+
+            ViewBag.PaymentMethods = new SelectList(new[]
+                {
+                    "Bank Transfer", "Credit Card", "MoMo", "ZaloPay"
+                });
+
             return View(model);
         }
 
