@@ -47,13 +47,23 @@ namespace RideSharingApp.Controllers
 
                     if (model.IsDriver)
                     {
+                        var vehicle = new Vehicle
+                        {
+                            Model = model.VehicleModel ?? "Unknown",
+                            Type = model.VehicleType ?? "Unknown",
+                            LicensePlate = model.LicensePlate ?? "Unknown",
+                            Capacity = model.Capacity ?? 4
+                        };
+                        _context.Vehicles.Add(vehicle);
+                        await _context.SaveChangesAsync(); // Save to get VehicleID
+
                         var driver = new Driver
                         {
                             DriverID = Guid.NewGuid().ToString(),
                             Name = model.Name,
                             PhoneNumber = model.PhoneNumber,
-                            LicenseNumber = "Pending", // Update as needed
-                            VehicleID = null // Update later
+                            LicenseNumber = model.LicenseNumber ?? "Pending",
+                            VehicleID = vehicle.VehicleID
                         };
                         _context.Drivers.Add(driver);
                         await _context.SaveChangesAsync();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RideSharingApp.Data;
+using RideSharingApp.Models;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -21,17 +22,17 @@ namespace RideSharingApp.Controllers
         {
             var bookings = _context.RideBookings
                 .Where(b => b.Status == "Pending")
-                .Select(b => new
+                .Select(b => new DriverDashboardViewModel
                 {
-                    b.BookingID,
+                    BookingID = b.BookingID,
                     Pickup = _context.Locations
                         .Where(l => l.LocationID == b.PickupLocationID)
                         .Select(l => l.Address)
-                        .FirstOrDefault() ?? "Unknown", // Use ?? to handle null 
+                        .FirstOrDefault() ?? "Unknown",
                     Dropoff = _context.Locations
                         .Where(l => l.LocationID == b.DropoffLocationID)
                         .Select(l => l.Address)
-                        .FirstOrDefault() ?? "Unknown" // Use ?? to handle null 
+                        .FirstOrDefault() ?? "Unknown"
                 })
                 .ToList();
 

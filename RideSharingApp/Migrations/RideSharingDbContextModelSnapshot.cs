@@ -303,6 +303,10 @@ namespace RideSharingApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DriverID")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<float>("GpsAccuracy")
                         .HasColumnType("real");
 
@@ -316,6 +320,8 @@ namespace RideSharingApp.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("LocationID");
+
+                    b.HasIndex("DriverID");
 
                     b.ToTable("Locations");
                 });
@@ -475,6 +481,17 @@ namespace RideSharingApp.Migrations
                         .IsRequired();
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("RideSharingApp.Models.Location", b =>
+                {
+                    b.HasOne("RideSharingApp.Models.Driver", "Driver")
+                        .WithMany()
+                        .HasForeignKey("DriverID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Driver");
                 });
 
             modelBuilder.Entity("RideSharingApp.Models.RideBooking", b =>

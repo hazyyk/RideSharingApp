@@ -13,5 +13,7 @@ namespace RideSharingApp.Models
         public double Longitude { get; set; }
         public DateTime Timestamp { get; set; }
         public float GpsAccuracy { get; set; }
+
+        
     }
 }

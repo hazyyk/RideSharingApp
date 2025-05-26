@@ -32,7 +32,35 @@
     </div>
     <div class="form-group">
         <label asp-for="IsDriver" class="control-label"></label>
-        <input asp-for="IsDriver" type="checkbox" />
+        <input asp-for="IsDriver" type="checkbox" id="isDriverCheckbox" />
+    </div>
+
+    <div id="driverFields" style="display: none;">
+        <div class="form-group">
+            <label asp-for="LicenseNumber" class="control-label"></label>
+            <input asp-for="LicenseNumber" class="form-control" />
+            <span asp-validation-for="LicenseNumber" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="VehicleModel" class="control-label"></label>
+            <input asp-for="VehicleModel" class="form-control" />
+            <span asp-validation-for="VehicleModel" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="VehicleType" class="control-label"></label>
+            <input asp-for="VehicleType" class="form-control" />
+            <span asp-validation-for="VehicleType" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="LicensePlate" class="control-label"></label>
+            <input asp-for="LicensePlate" class="form-control" />
+            <span asp-validation-for="LicensePlate" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Capacity" class="control-label"></label>
+            <input asp-for="Capacity" class="form-control" type="number" />
+            <span asp-validation-for="Capacity" class="text-danger"></span>
+        </div>
     </div>
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Register</button>
@@ -40,4 +68,17 @@
 </form>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById("isDriverCheckbox").addEventListener("change", function () {
+            const driverFields = document.getElementById("driverFields");
+            driverFields.style.display = this.checked ? "block" : "none";
+        });
+
+        // Show fields if already checked on reload
+        window.addEventListener("DOMContentLoaded", () => {
+            if (document.getElementById("isDriverCheckbox").checked) {
+                document.getElementById("driverFields").style.display = "block";
+            }
+        });
+    </script>
 }
