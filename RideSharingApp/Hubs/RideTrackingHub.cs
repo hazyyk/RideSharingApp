@@ -33,5 +33,11 @@ namespace RideSharingApp.Hubs
         {
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, bookingId);
         }
+
+        public async Task NotifyRideCompleted(string bookingId)
+        {
+            await Clients.Group(bookingId).SendAsync("OnRideCompleted",bookingId);
+        }
+
     }
 }

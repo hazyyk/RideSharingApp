@@ -61,6 +61,7 @@ namespace RideSharingApp.Controllers
                 if (!model.ConfirmPayment)
                 {
                     ModelState.AddModelError("ConfirmPayment", "You must confirm the payment.");
+                    ViewBag.PaymentMethods = new SelectList(new[] { "Bank Transfer", "Credit Card", "MoMo", "ZaloPay" });
                     return View(model);
                 }
 
@@ -71,6 +72,7 @@ namespace RideSharingApp.Controllers
                 if (booking == null)
                 {
                     ModelState.AddModelError(string.Empty, "Booking not found.");
+                    ViewBag.PaymentMethods = new SelectList(new[] { "Bank Transfer", "Credit Card", "MoMo", "ZaloPay" });
                     return View(model);
                 }
 

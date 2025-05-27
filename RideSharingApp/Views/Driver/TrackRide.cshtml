@@ -13,18 +13,26 @@
 <h2>Tracking Your Pickup (Simulated)</h2>
 <div id="map" style="height: 400px;"></div>
 
+<div class="mt-3">
+    <button id="reachPickupBtn" class="btn btn-success" >Reached Pickup</button>
+    <button id="completeBtn" class="btn btn-danger" >Complete Ride</button>
+</div>
+
 @section Scripts {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/polyline-encoded"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
     <script>
-        const pickupLat = @Model.PickupLocation.Latitude;
-        const pickupLng = @Model.PickupLocation.Longitude;
+        const bookingId = '@bookingId';
+        const pickupLat = @pickupLat;
+        const pickupLng = @pickupLng;
+        const dropoffLat = @dropoffLat;
+        const dropoffLng = @dropoffLng;
 
-        // Simulated driver location initially a bit away
-        let driverLat = pickupLat + 0.01;
-        let driverLng = pickupLng + 0.01;
+        let driverLat = @startLat;
+        let driverLng = @startLng;
 
         let map = L.map('map').setView([pickupLat, pickupLng], 14);
 
@@ -32,14 +40,33 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        let customerMarker = L.marker([pickupLat, pickupLng]).addTo(map).bindPopup("Customer Location").openPopup();
+        let customerMarker = L.marker([pickupLat, pickupLng]).addTo(map).bindPopup("Pickup Location").openPopup();
         let driverMarker = L.marker([driverLat, driverLng]).addTo(map).bindPopup("Driver Location");
         let routeLine;
+
+        let currentTarget = { lat: pickupLat, lng: pickupLng };
+        let headingToDropoff = false;
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/rideTrackingHub")
+            .build();
+
+        connection.start()
+            .then(() => {
+                console.log("Connected to SignalR hub");
+                connection.invoke("JoinBookingGroup", bookingId);
+            })
+            .catch(err => console.error(err.toString()));
+
+        function notifyReachedPickup() {
+            connection.invoke("NotifyDriverAccepted", bookingId)
+                .catch(err => console.error(err.toString()));
+        }
 
         function updateRoute() {
             if (routeLine) map.removeLayer(routeLine);
 
-            fetch(`https://graphhopper.com/api/1/route?point=${driverLat},${driverLng}&point=${pickupLat},${pickupLng}&type=json&vehicle=car&key=29f7be32-d45d-47cb-a324-d5f481781715`)
+            fetch(`https://graphhopper.com/api/1/route?point=${driverLat},${driverLng}&point=${currentTarget.lat},${currentTarget.lng}&type=json&vehicle=car&key=29f7be32-d45d-47cb-a324-d5f481781715`)
                 .then(res => res.json())
                 .then(data => {
                     if (!data.paths || data.paths.length === 0) {
@@ -58,16 +85,49 @@
                 });
         }
 
-        // Initial route draw
         updateRoute();
 
-        // Simulate driver movement toward pickup point
-        setInterval(() => {
-            driverLat -= 0.0005;
-            driverLng -= 0.0005;
+        let moveInterval = setInterval(() => {
+            const delta = 0.0005;
+            if (Math.abs(driverLat - currentTarget.lat) < delta && Math.abs(driverLng - currentTarget.lng) < delta) {
+                if (!headingToDropoff) {
+                    document.getElementById("reachPickupBtn").disabled = false;
+                } else {
+                    clearInterval(moveInterval);
+                    document.getElementById("completeBtn").disabled = false;
+                    alert("Reached Dropoff! Please complete the ride.");
+                }
+                return;
+            }
+
+            driverLat += (currentTarget.lat - driverLat) * 0.05;
+            driverLng += (currentTarget.lng - driverLng) * 0.05;
 
             driverMarker.setLatLng([driverLat, driverLng]);
             updateRoute();
-        }, 3000); // Update every 3 seconds
+
+            connection.invoke("UpdateDriverLocation", bookingId, driverLat, driverLng)
+                .catch(err => console.error(err.toString()));
+        }, 3000);
+
+        document.getElementById("reachPickupBtn").addEventListener("click", () => {
+            headingToDropoff = true;
+            currentTarget = { lat: dropoffLat, lng: dropoffLng };
+            document.getElementById("reachPickupBtn").disabled = true;
+
+            if (map.hasLayer(customerMarker)) map.removeLayer(customerMarker);
+            L.marker([dropoffLat, dropoffLng]).addTo(map).bindPopup("Dropoff Location").openPopup();
+
+            updateRoute();
+            notifyReachedPickup();
+        });
+
+        document.getElementById("completeBtn").addEventListener("click", function () {
+            connection.invoke("NotifyRideCompleted", bookingId)
+                .then(() => {
+                    window.location.href = '@Url.Action("Index", "Home")';
+                })
+                .catch(err => console.error("Failed to notify ride completion:", err));
+        });
     </script>
 }

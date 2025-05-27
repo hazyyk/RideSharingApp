@@ -1,4 +1,5 @@
 ﻿@model RideSharingApp.Models.RideBooking
+
 @{
     ViewData["Title"] = "Track Driver";
     var bookingId = Model.BookingID;
@@ -6,26 +7,29 @@
     var pickupLng = Model.PickupLocation?.Longitude ?? 0;
     var dropoffLat = Model.DropoffLocation?.Latitude ?? 0;
     var dropoffLng = Model.DropoffLocation?.Longitude ?? 0;
-    var startLat = pickupLat + 0.01;
-    var startLng = pickupLng + 0.01;
 }
 
-<h2>Tracking Your Driver (Simulated)</h2>
+<h2>Tracking Your Driver (Live)</h2>
 <div id="map" style="height: 400px;"></div>
-
 
 @section Scripts {
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/polyline-encoded"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
     <script>
-        const pickupLat = @Model.PickupLocation.Latitude;
-        const pickupLng = @Model.PickupLocation.Longitude;
+        const bookingId = '@bookingId';
+        const pickupLat = @pickupLat;
+        const pickupLng = @pickupLng;
+        const dropoffLat = @dropoffLat;
+        const dropoffLng = @dropoffLng;
 
-        // Simulated driver location initially a bit away
         let driverLat = pickupLat + 0.01;
         let driverLng = pickupLng + 0.01;
+
+        let currentTargetLat = pickupLat;
+        let currentTargetLng = pickupLng;
 
         let map = L.map('map').setView([pickupLat, pickupLng], 14);
 
@@ -33,14 +37,15 @@
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        let customerMarker = L.marker([pickupLat, pickupLng]).addTo(map).bindPopup("Customer Location").openPopup();
+        let customerMarker = L.marker([pickupLat, pickupLng]).addTo(map).bindPopup("Customer Pickup Location").openPopup();
         let driverMarker = L.marker([driverLat, driverLng]).addTo(map).bindPopup("Driver Location");
-        let routeLine;
+        let dropoffMarker = null;
+        let routeLine = null;
 
         function updateRoute() {
             if (routeLine) map.removeLayer(routeLine);
 
-            fetch(`https://graphhopper.com/api/1/route?point=${driverLat},${driverLng}&point=${pickupLat},${pickupLng}&type=json&vehicle=car&key=29f7be32-d45d-47cb-a324-d5f481781715`)
+            fetch(`https://graphhopper.com/api/1/route?point=${driverLat},${driverLng}&point=${currentTargetLat},${currentTargetLng}&type=json&vehicle=car&key=29f7be32-d45d-47cb-a324-d5f481781715`)
                 .then(res => res.json())
                 .then(data => {
                     if (!data.paths || data.paths.length === 0) {
@@ -59,16 +64,44 @@
                 });
         }
 
-        // Initial route draw
         updateRoute();
 
-        // Simulate driver movement toward pickup point
-        setInterval(() => {
-            driverLat -= 0.0005;
-            driverLng -= 0.0005;
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/rideTrackingHub")
+            .build();
+
+        connection.start()
+            .then(() => {
+                console.log("Connected to SignalR hub");
+                connection.invoke("JoinBookingGroup", bookingId);
+            })
+            .catch(err => console.error(err.toString()));
+
+        connection.on("ReceiveDriverLocation", (lat, lng) => {
+            driverLat = lat;
+            driverLng = lng;
 
             driverMarker.setLatLng([driverLat, driverLng]);
             updateRoute();
-        }, 3000); // Update every 3 seconds
+        });
+
+        connection.on("DriverAccepted", () => {
+            alert("Driver has reached the pickup point!");
+            currentTargetLat = dropoffLat;
+            currentTargetLng = dropoffLng;
+
+            if (dropoffMarker) {
+                map.removeLayer(dropoffMarker);
+            }
+
+            dropoffMarker = L.marker([dropoffLat, dropoffLng]).addTo(map).bindPopup("Dropoff Location").openPopup();
+
+            updateRoute();
+        });
+
+        connection.on("OnRideCompleted", function (bookingId) {
+            console.log("Ride completed for booking:", bookingId);
+            window.location.href = `/PaymentFeedback/Process?bookingId=${bookingId}`;
+        });
     </script>
 }
