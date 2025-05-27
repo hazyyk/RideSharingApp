@@ -97,7 +97,7 @@ namespace RideSharingApp.Controllers
                 await _context.SaveChangesAsync();
 
                 // Redirect to payment processing
-                return RedirectToAction("Process", "PaymentFeedback", new { bookingId = booking.BookingID });
+                return RedirectToAction("WaitingForDriver", new { bookingId = booking.BookingID });
             }
             return View(model);
         }
@@ -154,7 +154,16 @@ namespace RideSharingApp.Controllers
         {
             public string BookingId { get; set; }
         }
+        [Authorize]
+        [HttpGet]
+        public IActionResult WaitingForDriver(string bookingId)
+        {
+            var booking = _context.RideBookings.FirstOrDefault(b => b.BookingID == bookingId);
+            if (booking == null)
+                return NotFound();
 
+            return View(booking); 
+        }
 
 
 

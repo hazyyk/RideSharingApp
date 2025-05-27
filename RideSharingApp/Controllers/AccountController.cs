@@ -55,11 +55,11 @@ namespace RideSharingApp.Controllers
                         {
                             DriverID = Guid.NewGuid().ToString(),
                             Name = model.Name,
-                            Email = model.Email,               // Set email here
+                            Email = model.Email,               
                             PhoneNumber = model.PhoneNumber,
                             LicenseNumber = model.LicenseNumber ?? "Pending",
                             VehicleID = vehicle.VehicleID,
-                            IdentityUserId = user.Id           // Link driver to Identity user
+                            IdentityUserId = user.Id          
                         };
                         _context.Drivers.Add(driver);
                         await _context.SaveChangesAsync();
@@ -74,7 +74,7 @@ namespace RideSharingApp.Controllers
                             Name = model.Name,
                             Email = model.Email,
                             PhoneNumber = model.PhoneNumber,
-                            IdentityUserId = user.Id          // Link customer to Identity user
+                            IdentityUserId = user.Id          
                         };
                         _context.Customers.Add(customer);
                         await _context.SaveChangesAsync();

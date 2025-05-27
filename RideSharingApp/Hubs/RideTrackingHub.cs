@@ -12,6 +12,17 @@ namespace RideSharingApp.Hubs
             await Clients.Group(bookingId).SendAsync("ReceiveDriverLocation", latitude, longitude);
         }
 
+        public async Task SendDriverLocation(string bookingId, double lat, double lng)
+        {
+            await Clients.Group(bookingId).SendAsync("ReceiveDriverLocation", lat, lng);
+        }
+
+        public async Task NotifyDriverAccepted(string bookingId)
+        {
+            // Notify all clients in this booking group (including the customer)
+            await Clients.Group(bookingId).SendAsync("DriverAccepted");
+        }
+
         // Customer or driver join group to receive/send updates
         public async Task JoinBookingGroup(string bookingId)
         {

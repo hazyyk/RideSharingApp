@@ -1,0 +1,21 @@
+﻿@model RideSharingApp.Models.RideBooking
+
+<h2>Waiting for Driver to Accept...</h2>
+<p>Please wait while we find a driver for you.</p>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const bookingId = '@Model.BookingID';
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/rideTrackingHub")
+        .build();
+
+    connection.start().then(() => {
+        connection.invoke("JoinBookingGroup", bookingId);
+    });
+
+    connection.on("DriverAccepted", () => {
+        window.location.href = `/RideBooking/Track?bookingId=${bookingId}`;
+    });
+</script>

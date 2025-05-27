@@ -1,21 +1,45 @@
-using System.Diagnostics;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using RideSharingApp.Data;
 using RideSharingApp.Models;
+using System.Diagnostics;
 
 namespace RideSharingApp.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly RideSharingDbContext _context;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, RideSharingDbContext context, UserManager<IdentityUser> userManager)
         {
             _logger = logger;
+            _context = context;
+            _userManager = userManager;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
+            List<RideBooking> acceptedRides = new();
+
+            if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Customer"))
+            {
+                var user = await _userManager.GetUserAsync(User);
+                var customer = await _context.Customers
+                    .FirstOrDefaultAsync(c => c.IdentityUserId == user.Id); 
+
+                if (customer != null)
+                {
+                    acceptedRides = await _context.RideBookings
+                        .Include(rb => rb.Driver)
+                        .Where(rb => rb.CustomerID == customer.CustomerID && rb.Status == "Accepted")
+                        .ToListAsync();
+                }
+            }
+
+            return View(acceptedRides);
         }
 
         public IActionResult Privacy()

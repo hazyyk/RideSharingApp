@@ -18,5 +18,8 @@ namespace RideSharingApp.Models
 
         public string IdentityUserId { get; set; } = string.Empty;
         public virtual ICollection<RideBooking> RideBookings { get; set; } = new List<RideBooking>();
+
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 }

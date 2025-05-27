@@ -1,67 +1,74 @@
 ﻿@model RideSharingApp.Models.RideBooking
-
 @{
-    ViewData["Title"] = "Track Your Ride";
+    ViewData["Title"] = "Track Driver";
+    var bookingId = Model.BookingID;
+    var pickupLat = Model.PickupLocation?.Latitude ?? 0;
+    var pickupLng = Model.PickupLocation?.Longitude ?? 0;
+    var dropoffLat = Model.DropoffLocation?.Latitude ?? 0;
+    var dropoffLng = Model.DropoffLocation?.Longitude ?? 0;
+    var startLat = pickupLat + 0.01;
+    var startLng = pickupLng + 0.01;
 }
 
-<h2>Track Your Ride @Model.BookingID</h2>
+<h2>Tracking Your Driver (Simulated)</h2>
+<div id="map" style="height: 400px;"></div>
 
-<p><strong>Driver:</strong> @Model.Driver?.Name ?? "Not Assigned Yet"</p>
-
-<div id="map" style="height: 400px; margin-bottom: 20px;"></div>
-
-<button id="finishBtn" class="btn btn-primary" @(Model.Status != "Accepted" ? "disabled" : "")>Finish Ride</button>
 
 @section Scripts {
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="https://unpkg.com/polyline-encoded"></script>
 
     <script>
-        var map = L.map('map').setView([10.7769, 106.7009], 13); // default to Ho Chi Minh city
+        const pickupLat = @Model.PickupLocation.Latitude;
+        const pickupLng = @Model.PickupLocation.Longitude;
+
+        // Simulated driver location initially a bit away
+        let driverLat = pickupLat + 0.01;
+        let driverLng = pickupLng + 0.01;
+
+        let map = L.map('map').setView([pickupLat, pickupLng], 14);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data © OpenStreetMap contributors'
+            attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Show pickup and dropoff markers
-        var pickupLat = @Model.PickupLocation.Latitude;
-        var pickupLon = @Model.PickupLocation.Longitude;
-        var dropLat = @Model.DropoffLocation.Latitude;
-        var dropLon = @Model.DropoffLocation.Longitude;
+        let customerMarker = L.marker([pickupLat, pickupLng]).addTo(map).bindPopup("Customer Location").openPopup();
+        let driverMarker = L.marker([driverLat, driverLng]).addTo(map).bindPopup("Driver Location");
+        let routeLine;
 
-        var pickupMarker = L.marker([pickupLat, pickupLon]).addTo(map).bindPopup("Pickup Location").openPopup();
-        var dropoffMarker = L.marker([dropLat, dropLon]).addTo(map).bindPopup("Dropoff Location");
+        function updateRoute() {
+            if (routeLine) map.removeLayer(routeLine);
 
-        // Driver marker (updated in real-time)
-        var driverMarker = null;
+            fetch(`https://graphhopper.com/api/1/route?point=${driverLat},${driverLng}&point=${pickupLat},${pickupLng}&type=json&vehicle=car&key=29f7be32-d45d-47cb-a324-d5f481781715`)
+                .then(res => res.json())
+                .then(data => {
+                    if (!data.paths || data.paths.length === 0) {
+                        console.warn("No route found.");
+                        return;
+                    }
 
-        // SignalR connection
-        const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/rideTrackingHub")
-            .build();
+                    const path = data.paths[0];
+                    const coords = L.Polyline.fromEncoded(path.points).getLatLngs();
 
-        connection.start().then(() => {
-            console.log("Connected to rideTrackingHub");
+                    routeLine = L.polyline(coords, { color: 'blue', weight: 5 }).addTo(map);
+                    map.fitBounds(routeLine.getBounds());
+                })
+                .catch(err => {
+                    console.error("Failed to load route:", err);
+                });
+        }
 
-            // Join booking group to receive updates
-            connection.invoke("JoinBookingGroup", '@Model.BookingID');
-        }).catch(err => console.error(err.toString()));
+        // Initial route draw
+        updateRoute();
 
-        // Receive driver location update
-        connection.on("ReceiveDriverLocation", function (lat, lon) {
-            if (driverMarker) {
-                driverMarker.setLatLng([lat, lon]);
-         body: JSON.stringify({ bookingId: '@Model.BookingID' })
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = '/PaymentFeedback/Process?bookingId=@Model.BookingID';
-                } else {
-                    alert("Failed to finish ride.");
-                }
-            });
-        });
+        // Simulate driver movement toward pickup point
+        setInterval(() => {
+            driverLat -= 0.0005;
+            driverLng -= 0.0005;
+
+            driverMarker.setLatLng([driverLat, driverLng]);
+            updateRoute();
+        }, 3000); // Update every 3 seconds
     </script>
 }
