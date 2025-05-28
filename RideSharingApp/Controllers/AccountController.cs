@@ -21,9 +21,13 @@ namespace RideSharingApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult Register()
+        public IActionResult Register(string role)
         {
-            return View();
+            var model = new RegisterViewModel
+            {
+                IsDriver = role == "driver"
+            };
+            return View(model.IsDriver ? "RegisterDriver" : "RegisterCustomer", model);
         }
 
         [HttpPost]
@@ -55,11 +59,11 @@ namespace RideSharingApp.Controllers
                         {
                             DriverID = Guid.NewGuid().ToString(),
                             Name = model.Name,
-                            Email = model.Email,               
+                            Email = model.Email,
                             PhoneNumber = model.PhoneNumber,
                             LicenseNumber = model.LicenseNumber ?? "Pending",
                             VehicleID = vehicle.VehicleID,
-                            IdentityUserId = user.Id          
+                            IdentityUserId = user.Id
                         };
                         _context.Drivers.Add(driver);
                         await _context.SaveChangesAsync();
@@ -74,7 +78,7 @@ namespace RideSharingApp.Controllers
                             Name = model.Name,
                             Email = model.Email,
                             PhoneNumber = model.PhoneNumber,
-                            IdentityUserId = user.Id          
+                            IdentityUserId = user.Id
                         };
                         _context.Customers.Add(customer);
                         await _context.SaveChangesAsync();
@@ -89,7 +93,7 @@ namespace RideSharingApp.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-            return View(model);
+            return View(model.IsDriver ? "RegisterDriver" : "RegisterCustomer", model);
         }
 
         [HttpGet]

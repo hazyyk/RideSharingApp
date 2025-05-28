@@ -1,0 +1,201 @@
+﻿@model RideSharingApp.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Driver Registration - RideSharingApp";
+}
+
+<div class="background-overlay"></div>
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card p-4 shadow-lg" style="max-width: 700px; width: 100%;">
+        <h2 class="text-center mb-4">Driver Registration</h2>
+        <form asp-action="Register" method="post" autocomplete="off">
+            <input type="hidden" asp-for="IsDriver" value="true" />
+
+            <div class="container-fluid px-0">
+                <div class="row gx-3 gy-3">
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Name" class="form-label">Full Name</label>
+                        <input asp-for="Name" class="form-control" placeholder="Enter your full name" aria-label="Full name" aria-describedby="NameValidation" />
+                        <span asp-validation-for="Name" class="text-danger" id="NameValidation"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email" aria-label="Email address" aria-describedby="EmailValidation" />
+                        <span asp-validation-for="Email" class="text-danger" id="EmailValidation"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" autocomplete="new-password" aria-label="Password" aria-describedby="PasswordValidation" />
+                        <span asp-validation-for="Password" class="text-danger" id="PasswordValidation"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                        <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm your password" autocomplete="new-password" aria-label="Confirm password" aria-describedby="ConfirmPasswordValidation" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger" id="ConfirmPasswordValidation"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="LicenseNumber" class="form-label">License Number</label>
+                        <input asp-for="LicenseNumber" class="form-control" placeholder="Enter your license number" aria-label="Driver license number" aria-describedby="LicenseNumberValidation" />
+                        <span asp-validation-for="LicenseNumber" class="text-danger" id="LicenseNumberValidation"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="VehicleModel" class="form-label">Vehicle Model</label>
+                        <input asp-for="VehicleModel" class="form-control" placeholder="Enter your vehicle model" aria-label="Vehicle model" aria-describedby="VehicleModelValidation" />
+                        <span asp-validation-for="VehicleModel" class="text-danger" id="VehicleModelValidation"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="VehicleType" class="form-label">Vehicle Type</label>
+                        <input asp-for="VehicleType" class="form-control" placeholder="e.g., Sedan, SUV" aria-label="Vehicle type" aria-describedby="VehicleTypeValidation" />
+                        <span asp-validation-for="VehicleType" class="text-danger" id="VehicleTypeValidation"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="LicensePlate" class="form-label">License Plate</label>
+                        <input asp-for="LicensePlate" class="form-control" placeholder="Enter your license plate" aria-label="License plate" aria-describedby="LicensePlateValidation" />
+                        <span asp-validation-for="LicensePlate" class="text-danger" id="LicensePlateValidation"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Capacity" class="form-label">Vehicle Capacity</label>
+                        <input asp-for="Capacity" class="form-control" placeholder="e.g., 4 passengers" aria-label="Vehicle capacity" aria-describedby="CapacityValidation" />
+                        <span asp-validation-for="Capacity" class="text-danger" id="CapacityValidation"></span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center gap-2 mt-4" id="registerButton">
+                Register
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
+        </form>
+
+        <p class="text-center mt-3">
+            Already have an account? <a href="/Account/Login">Login</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_ValidationScriptsPartial")
+    <script>
+        $(document).ready(function () {
+            $('form').on('submit', function () {
+                var $button = $('#registerButton');
+                $button.find('.spinner-border').removeClass('d-none');
+                $button.prop('disabled', true);
+            });
+
+            // Real-time validation feedback
+            $('input').on('input', function () {
+                var $input = $(this);
+                var $error = $input.next('.text-danger');
+                if ($input.valid()) {
+                    $input.css('border-color', '#28a745');
+                } else {
+                    $input.css('border-color', '#dc3545');
+                }
+            });
+        });
+    </script>
+}
+
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+    }
+
+    .background-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('/images/7372901_3643906.jpg') no-repeat center center fixed;
+        background-size: cover;
+        z-index: -1;
+    }
+
+        .background-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+    .card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        box-shadow: 0 0 40px rgba(123, 31, 162, 0.6);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #444;
+    }
+
+    .form-control {
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        background: #f8f9fa;
+        box-shadow: 0 5px 15px rgba(123, 31, 162, 0.1);
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+        .form-control:focus {
+            border-color: #6a82fb;
+            box-shadow: 0 0 5px rgba(106, 130, 251, 0.3);
+            background: #fff;
+            outline: none;
+        }
+
+        .form-control:valid {
+            border-color: #28a745;
+        }
+
+    .btn-primary {
+        border-radius: 25px;
+        background: #0d6efd;
+        color: white;
+        font-weight: bold;
+        border: none;
+        box-shadow: 0 5px 20px rgba(13, 110, 253, 0.5);
+        transition: background 0.3s, color 0.3s;
+    }
+
+        .btn-primary:hover {
+            background: #0b5ed7;
+        }
+
+        .btn-primary:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+    a {
+        color: #6a82fb;
+        text-decoration: none;
+    }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+    .text-danger {
+        font-size: 0.875em;
+        margin-top: 5px;
+    }
+</style>

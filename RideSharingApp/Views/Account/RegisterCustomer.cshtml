@@ -1,0 +1,130 @@
+﻿@model RideSharingApp.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Customer Registration - RideSharingApp";
+}
+
+<div class="background-overlay"></div>
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card p-4 shadow-lg" style="max-width: 700px; width: 100%;">
+        <h2 class="text-center mb-4">Customer Registration</h2>
+        <form asp-action="Register" method="post" autocomplete="off">
+            <input type="hidden" asp-for="IsDriver" value="false" />
+
+            <div class="container-fluid px-0">
+                <div class="row gx-3 gy-3">
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Name" class="form-label">Full Name</label>
+                        <input asp-for="Name" class="form-control" placeholder="Enter your full name" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <input asp-for="Password" class="form-control" placeholder="Enter your password" type="password" autocomplete="new-password" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                        <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" type="password" autocomplete="new-password" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center gap-2 mt-4">
+                Register 
+            </button>
+        </form>
+
+        <p class="text-center mt-3">
+            Already have an account? <a href="/Account/Login">Login</a>
+        </p>
+    </div>
+</div>
+
+@section Scripts {
+    @Html.Partial("_ValidationScriptsPartial")
+}
+
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Arial', sans-serif;
+    }
+
+    .background-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('/images/7372901_3643906.jpg') no-repeat center center fixed;
+        background-size: cover;
+        z-index: -1;
+    }
+
+        .background-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+    .card {
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+    }
+
+    .form-control {
+        border-radius: 25px;
+        background-color: #f8f9fa;
+    }
+
+    .btn {
+        border-radius: 25px;
+        font-weight: bold;
+        transition: background 0.3s, color 0.3s;
+    }
+
+    .btn-primary {
+        background: #0d6efd;
+        color: white;
+        border: none;
+    }
+
+        .btn-primary:hover {
+            background: #0b5ed7;
+        }
+
+    a {
+        color: #6a82fb;
+        text-decoration: none;
+    }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+    
+</style>

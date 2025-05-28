@@ -4,40 +4,96 @@
     ViewData["Title"] = "Submit Feedback";
 }
 
-<h2>Submit Feedback</h2>
+<div class="form-wrapper">
+    <div class="card p-4 shadow-lg" style="max-width: 600px; width: 100%;">
+        <h2 class="text-center mb-4">Submit Feedback</h2>
 
-<form asp-action="Feedback" method="post">
-    <input type="hidden" asp-for="BookingID" />
-    <div asp-validation-summary="All" class="text-danger"></div>
-    <div class="form-group">
-        <label class="control-label">Rating</label>
-        <div class="star-rating" id="starRating">
-            @for (int i = 5; i >= 1; i--)
-            {
-                <input type="radio" id="star@(i)" name="Rating" value="@(i)" @(Model.Rating == i ? "checked" : "") required />
-                <label for="star@(i)" title="@(i) star@(i > 1 ? "s" : "")">★</label>
-            }
-        </div>
-        <span asp-validation-for="Rating" class="text-danger"></span>
-    </div>
+        <form asp-action="Feedback" method="post">
+            <input type="hidden" asp-for="BookingID" />
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
-    <div class="form-group">
-        <label asp-for="Comments" class="control-label"></label>
-        <textarea asp-for="Comments" class="form-control"></textarea>
-    </div>
+            <div class="mb-4">
+                <label class="form-label">Rating</label>
+                <div class="star-rating" id="starRating">
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <input type="radio" id="star@(i)" name="Rating" value="@(i)" @(Model.Rating == i ? "checked" : "") required />
+                        <label for="star@(i)" title="@(i) star@(i > 1 ? "s" : "")">★</label>
+                    }
+                </div>
+                <span asp-validation-for="Rating" class="text-danger d-block mt-1"></span>
+            </div>
 
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Submit Feedback</button>
+            <div class="mb-4">
+                <label asp-for="Comments" class="form-label">Comments</label>
+                <textarea asp-for="Comments" class="form-control" rows="4" style="resize: none;"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-register w-100 d-flex justify-content-between align-items-center">
+                Submit <span>✔</span>
+            </button>
+        </form>
     </div>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
     <style>
+        body {
+            background: linear-gradient(to bottom right, #e0f7fa, #e1bee7);
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .form-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 25px;
+            box-shadow: 0 0 30px rgba(123, 31, 162, 0.4);
+        }
+
+        .form-control {
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 20px;
+            background: #f2f2f2;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: border-color 0.3s ease-in-out;
+        }
+
+            .form-control:focus {
+                border-color: #6a82fb;
+                box-shadow: 0 0 5px rgba(106, 130, 251, 0.3);
+            }
+
+        .btn-register {
+            padding: 12px;
+            background-color: #673ab7;
+            color: white;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+            .btn-register:hover {
+                background-color: #5e35b1;
+            }
+
         .star-rating {
             display: inline-flex;
             flex-direction: row-reverse;
             justify-content: flex-end;
+            gap: 5px;
         }
 
             .star-rating input[type="radio"] {
@@ -51,25 +107,21 @@
                 transition: color 0.2s;
             }
 
+                .star-rating input[type="radio"]:checked ~ label,
                 .star-rating label:hover,
                 .star-rating label:hover ~ label {
                     color: gold;
                 }
-
-            .star-rating input[type="radio"]:checked ~ label {
-                color: gold;
-            }
     </style>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const starRating = document.getElementById("starRating");
             const stars = starRating.querySelectorAll("input[type='radio']");
             const labels = starRating.querySelectorAll("label");
 
-            // Initialize the star display based on the checked value
             updateStars();
 
-            // Add click event to each star
             stars.forEach(star => {
                 star.addEventListener("change", function () {
                     updateStars();
@@ -80,13 +132,9 @@
                 const checkedStar = starRating.querySelector("input[type='radio']:checked");
                 const checkedValue = checkedStar ? parseInt(checkedStar.value) : 0;
 
-                labels.forEach((label, index) => {
+                labels.forEach((label) => {
                     const starValue = parseInt(label.getAttribute("for").replace("star", ""));
-                    if (starValue <= checkedValue) {
-                        label.style.color = "gold";
-                    } else {
-                        label.style.color = "#ccc";
-                    }
+                    label.style.color = (starValue <= checkedValue) ? "gold" : "#ccc";
                 });
             }
         });

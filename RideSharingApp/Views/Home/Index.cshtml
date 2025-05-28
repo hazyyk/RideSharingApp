@@ -2,30 +2,182 @@
 
 @{
     ViewData["Title"] = "Home Page - RideSharingApp";
+   
 }
 
-<div class="text-center">
+<div class="container text-center min-vh-100 d-flex flex-column justify-content-center home-container">
     <h1 class="display-4">Welcome to RideSharingApp</h1>
     <p class="lead">Book rides, connect with drivers, and provide feedback with ease!</p>
+
     @if (!User.Identity?.IsAuthenticated ?? true)
     {
-        <div>
-            <a href="/Account/Register" class="btn btn-primary m-2">Register</a>
-            <a href="/Account/Login" class="btn btn-secondary m-2">Login</a>
+        <div class="my-4">
+            <a href="/Account/Register?role=customer" class="btn btn-primary m-2 d-inline-flex align-items-center">
+                Register as Customer <span class="ms-2">→</span>
+            </a>
+            <a href="/Account/Register?role=driver" class="btn btn-secondary m-2 d-inline-flex align-items-center">
+                Register as Driver <span class="ms-2">→</span>
+            </a>
+            <a href="/Account/Login" class="btn btn-outline-secondary m-2 d-inline-flex align-items-center">
+                Login <span class="ms-2">→</span>
+            </a>
         </div>
     }
     else
     {
-        <div>
-            <a href="/RideBooking/Book" class="btn btn-success m-2">Book a Ride</a>
-            @if (User.IsInRole("Driver")) // Assuming you'll add role-based logic later
+        <div class="my-4">
+            @if (!User.IsInRole("Driver"))
             {
-                <a href="/Driver/Dashboard" class="btn btn-info m-2">Driver Dashboard</a>
+                <a href="/RideBooking/Book" class="btn btn-success m-2 d-inline-flex align-items-center">
+                    Book a Ride <span class="ms-2">→</span>
+                </a>
             }
+
+            @if (User.IsInRole("Driver"))
+            {
+                <a href="/Driver/Dashboard" class="btn btn-info m-2 d-inline-flex align-items-center">
+                    Driver Dashboard <span class="ms-2">→</span>
+                </a>
+            }
+
             <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
-                <button type="submit" class="btn btn-danger m-2">Logout</button>
+                <button type="submit" class="btn btn-danger m-2 d-inline-flex align-items-center">
+                    Logout <span class="ms-2">→</span>
+                </button>
             </form>
         </div>
     }
-    <p>Learn more about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    
 </div>
+
+<style>
+    body {
+        background: url('/images/7372901_3643906.jpg') no-repeat center center fixed !important;
+        background-size: cover !important;
+        min-height: 100vh;
+        position: relative;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+    }
+
+        /* Semi-transparent overlay for readability */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Dark overlay for contrast */
+            z-index: 0; /* Behind all content */
+        }
+
+        /* Ensure all content is above the overlay */
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+
+    /* Enhance navbar for contrast and compatibility with _Layout.cshtml */
+    .navbar {
+        background: rgba(255, 255, 255, 0.95) !important; /* Slightly more opaque than _Layout */
+        backdrop-filter: blur(10px); /* Keep blur effect */
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Match _Layout shadow */
+    }
+
+    .navbar-brand, .nav-link, .dropdown-item {
+        color: #333 !important; /* Match _Layout.cshtml */
+    }
+
+        .nav-link:hover, .dropdown-item:hover {
+            color: #6a82fb !important; /* Match _Layout hover color */
+        }
+
+    .dropdown-menu {
+        background: #fff !important; /* Match _Layout */
+        border: none !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+    }
+
+    .dropdown-item:hover {
+        background: #e6f0fa !important; /* Match _Layout */
+    }
+
+    /* Style home container content */
+    .home-container {
+        color: #fff; /* White text for contrast */
+    }
+
+        .home-container h1, .home-container p {
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* Shadow for readability */
+        }
+
+        .home-container .btn {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .home-container .btn-primary {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+            .home-container .btn-primary:hover {
+                background: #6a82fb;
+                color: #fff;
+                border-color: #6a82fb;
+            }
+
+        .home-container .btn-secondary {
+            background: #fff;
+            border: 1px solid #ddd;
+            color: #333;
+        }
+
+            .home-container .btn-secondary:hover {
+                background: #fc466b;
+                color: #fff;
+                border-color: #fc466b;
+            }
+
+        .home-container .btn-outline-secondary {
+            border: 1px solid #ddd;
+            color: #fff; /* White for contrast */
+        }
+
+            .home-container .btn-outline-secondary:hover {
+                background: #c3cfe2;
+                color: #333;
+                border-color: #c3cfe2;
+            }
+
+        .home-container .btn-success:hover {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .home-container .btn-info:hover {
+            background: #17a2b8;
+            color: #fff;
+        }
+
+        .home-container .btn-danger:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .home-container a, .home-container .btn {
+            text-decoration: none;
+        }
+
+            .home-container a:hover {
+                text-decoration: none;
+            }
+
+            .home-container .btn span {
+                font-size: 1.2em;
+            }
+</style>

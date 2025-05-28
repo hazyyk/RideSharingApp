@@ -125,9 +125,17 @@ namespace RideSharingApp.Controllers
                 };
                 _context.Feedbacks.Add(feedback);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("PaymentSuccess", new { bookingId = model.BookingID }); // Redirect to PaymentSuccess
             }
             return View(model);
+        }
+        
+
+        [HttpGet]
+        public IActionResult PaymentSuccess(string bookingId)
+        {
+            ViewBag.BookingID = bookingId; // Pass bookingId to the view if needed
+            return View();
         }
     }
 }

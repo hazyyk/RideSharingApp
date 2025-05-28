@@ -3,47 +3,62 @@
     ViewData["Title"] = "Book a Ride";
 }
 
-<h2>Book a Ride</h2>
+<div class="container mt-5">
+    <div class="row">
+        <!-- Ride Booking Form -->
+        <div class="col-md-6">
+            <h2 class="mb-4">Book a Ride</h2>
+            <form asp-action="Book" method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
 
-<form asp-action="Book" method="post">
-    <div asp-validation-summary="All" class="text-danger"></div>
+                <div class="mb-3">
+                    <label asp-for="PickupAddress" class="form-label"></label>
+                    <input asp-for="PickupAddress" class="form-control" />
+                </div>
 
-    <div class="form-group">
-        <label asp-for="PickupAddress"></label>
-        <input asp-for="PickupAddress" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="PickupLatitude"></label>
-        <input asp-for="PickupLatitude" class="form-control" type="number" step="any" id="pickupLat" name="PickupLatitude" />
-    </div>
-    <div class="form-group">
-        <label asp-for="PickupLongitude"></label>
-        <input asp-for="PickupLongitude" class="form-control" type="number" step="any" id="pickupLon" name="PickupLongitude" />
-    </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PickupLatitude" class="form-label"></label>
+                        <input asp-for="PickupLatitude" class="form-control" type="number" step="any" id="pickupLat" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="PickupLongitude" class="form-label"></label>
+                        <input asp-for="PickupLongitude" class="form-control" type="number" step="any" id="pickupLon" />
+                    </div>
+                </div>
 
-    <div class="form-group">
-        <label asp-for="DropoffAddress"></label>
-        <input asp-for="DropoffAddress" class="form-control" />
-    </div>
-    <div class="form-group">
-        <label asp-for="DropoffLatitude"></label>
-        <input asp-for="DropoffLatitude" class="form-control" type="number" step="any" id="dropLat" name="DropoffLatitude" />
-    </div>
-    <div class="form-group">
-        <label asp-for="DropoffLongitude"></label>
-        <input asp-for="DropoffLongitude" class="form-control" type="number" step="any" id="dropLon" name="DropoffLongitude" />
-    </div>
+                <div class="mb-3">
+                    <label asp-for="DropoffAddress" class="form-label"></label>
+                    <input asp-for="DropoffAddress" class="form-control" />
+                </div>
 
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Book Ride</button>
-        <button type="button" class="btn btn-info" onclick="showRoute()">Preview Route</button>
-    </div>
-</form>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DropoffLatitude" class="form-label"></label>
+                        <input asp-for="DropoffLatitude" class="form-control" type="number" step="any" id="dropLat" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="DropoffLongitude" class="form-label"></label>
+                        <input asp-for="DropoffLongitude" class="form-control" type="number" step="any" id="dropLon" />
+                    </div>
+                </div>
 
-<hr />
-<h3>Route Preview</h3>
-<div id="map" style="height: 400px; margin-top: 20px;"></div>
-<div id="paymentPreview" class="mt-3"></div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Book Ride</button>
+                    <button type="button" class="btn btn-info" onclick="showRoute()">Preview Route</button>
+                    <button type="button" class="btn btn-secondary" onclick="useCurrentLocation()">Use Current Location</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Route Preview -->
+        <div class="col-md-6">
+            <h3>Route Preview</h3>
+            <div id="map" style="height: 400px;" class="mb-3"></div>
+            <div id="paymentPreview"></div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
@@ -63,37 +78,29 @@
             map = L.map('map').setView([14.0583, 108.2772], 6);
 
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: 'Map data © <a href="https://openstreet-map.org">OpenStreetMap</a> contributors'
+                attribution: '© OpenStreetMap contributors'
             }).addTo(map);
-
-            const getLocationBtn = document.createElement("button");
-            getLocationBtn.textContent = "Use Current Location";
-            getLocationBtn.type = "button";
-            getLocationBtn.className = "btn btn-secondary mb-3";
-
-            const pickupGroup = document.querySelector('input[name="PickupLatitude"]').closest(".form-group");
-            pickupGroup.insertAdjacentElement("beforebegin", getLocationBtn);
-
-            getLocationBtn.addEventListener("click", function () {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(function (position) {
-                        const lat = position.coords.latitude;
-                        const lon = position.coords.longitude;
-
-                        document.querySelector('input[name="PickupLatitude"]').value = lat;
-                        document.querySelector('input[name="PickupLongitude"]').value = lon;
-
-                        if (pickupMarker) map.removeLayer(pickupMarker);
-                        pickupMarker = L.marker([lat, lon]).addTo(map).bindPopup("Pickup (Current Location)").openPopup();
-                        map.setView([lat, lon], 13);
-                    }, function (error) {
-                        alert("Geolocation error: " + error.message);
-                    });
-                } else {
-                    alert("Geolocation is not supported by this browser.");
-                }
-            });
         });
+
+        function useCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function (position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+
+                    document.getElementById('pickupLat').value = lat;
+                    document.getElementById('pickupLon').value = lon;
+
+                    if (pickupMarker) map.removeLayer(pickupMarker);
+                    pickupMarker = L.marker([lat, lon]).addTo(map).bindPopup("Pickup (Current Location)").openPopup();
+                    map.setView([lat, lon], 13);
+                }, function (error) {
+                    alert("Geolocation error: " + error.message);
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
 
         function showRoute() {
             const pickupLat = parseFloat(document.getElementById('pickupLat').value);
@@ -117,7 +124,6 @@
 
             pickupMarker = L.marker([pickupLat, pickupLon]).addTo(map).bindPopup("Pickup").openPopup();
             dropoffMarker = L.marker([dropLat, dropLon]).addTo(map).bindPopup("Dropoff").openPopup();
-
             map.setView([pickupLat, pickupLon], 13);
 
             fetch(`https://graphhopper.com/api/1/route?point=${pickupLat},${pickupLon}&point=${dropLat},${dropLon}&type=json&vehicle=car&key=29f7be32-d45d-47cb-a324-d5f481781715`)
@@ -134,13 +140,10 @@
                     routeLine = L.polyline(coords, { color: 'blue', weight: 5 }).addTo(map);
                     map.fitBounds(routeLine.getBounds());
 
-                    // Calculate payment based on distance (in meters from GraphHopper)
-                    const distanceMeters = path.distance; // Distance in meters
-                    const distanceKm = distanceMeters / 1000; // Convert to kilometers
-                    const ratePerKm = 10000; // 10,000 VND per km
+                    const distanceKm = path.distance / 1000;
+                    const ratePerKm = 10000;
                     const amountVND = distanceKm * ratePerKm;
 
-                    // Display payment preview
                     const paymentPreview = document.getElementById('paymentPreview');
                     paymentPreview.innerHTML = `
                         <div class="alert alert-info">
@@ -152,8 +155,6 @@
                     console.error("Error loading route:", err);
                     alert("Failed to load route.");
                 });
-
-        
         }
     </script>
 }

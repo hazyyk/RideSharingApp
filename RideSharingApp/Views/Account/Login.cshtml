@@ -1,28 +1,170 @@
 ﻿@model RideSharingApp.Models.LoginViewModel
+
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Login - RideSharingApp";
 }
-<h2>Login</h2>
-<form asp-action="Login" method="post">
-    <div asp-validation-summary="All" class="text-danger"></div>
-    <div class="form-group">
-        <label asp-for="Email" class="control-label"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
+
+<div class="background-overlay"></div>
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card p-4 shadow-lg" style="max-width: 400px; width: 100%;">
+        <h2 class="text-center mb-4">Login</h2>
+        <form asp-action="Login" method="post" autocomplete="off">
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" placeholder="Enter your email" aria-label="Email address" aria-describedby="EmailValidation" />
+                <span asp-validation-for="Email" class="text-danger" id="EmailValidation"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" autocomplete="current-password" aria-label="Password" aria-describedby="PasswordValidation" />
+                <span asp-validation-for="Password" class="text-danger" id="PasswordValidation"></span>
+            </div>
+
+            <div class="form-check mb-3">
+                <input asp-for="RememberMe" class="form-check-input" id="RememberMe" aria-label="Remember me checkbox" />
+                <label asp-for="RememberMe" class="form-check-label">Remember me</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center gap-2" id="loginButton">
+                Login 
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
+        </form>
+
+        <p class="text-center mt-3">
+            Don't have an account? <a href="/Account/Register">Register</a> 
+        </p>
     </div>
-    <div class="form-group">
-        <label asp-for="Password" class="control-label"></label>
-        <input asp-for="Password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="RememberMe" class="control-label"></label>
-        <input asp-for="RememberMe" />
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Login</button>
-    </div>
-</form>
+</div>
+
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @Html.Partial("_ValidationScriptsPartial")
+    <script>
+        $(document).ready(function () {
+            $('form').on('submit', function () {
+                var $button = $('#loginButton');
+                $button.find('.spinner-border').removeClass('d-none');
+                $button.prop('disabled', true);
+            });
+
+            // Real-time validation feedback
+            $('input').on('input', function () {
+                var $input = $(this);
+                if ($input.valid()) {
+                    $input.css('border-color', '#28a745');
+                } else {
+                    $input.css('border-color', '#dc3545');
+                }
+            });
+        });
+    </script>
 }
+
+<style>
+    body, html {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+    }
+
+    .background-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('/images/7372901_3643906.jpg') no-repeat center center fixed;
+        background-size: cover;
+        z-index: -1;
+    }
+
+        .background-overlay::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+
+    .card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        box-shadow: 0 0 40px rgba(123, 31, 162, 0.6);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #444;
+    }
+
+    .form-control {
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        background: #f8f9fa;
+        box-shadow: 0 5px 15px rgba(123, 31, 162, 0.1);
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+        .form-control:focus {
+            border-color: #6a82fb;
+            box-shadow: 0 0 5px rgba(106, 130, 251, 0.3);
+            background: #fff;
+            outline: none;
+        }
+
+        .form-control:valid {
+            border-color: #28a745;
+        }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        font-size: 13px;
+    }
+
+    .form-check-input {
+        margin-right: 10px;
+        accent-color: #6a82fb;
+    }
+
+    .btn-primary {
+        border-radius: 25px;
+        background: #0d6efd;
+        color: white;
+        font-weight: bold;
+        border: none;
+        box-shadow: 0 5px 20px rgba(13, 110, 253, 0.5);
+        transition: background 0.3s, color 0.3s;
+    }
+
+        .btn-primary:hover {
+            background: #0b5ed7;
+        }
+
+        .btn-primary:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+    a {
+        color: #6a82fb;
+        text-decoration: none;
+    }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+    .text-danger {
+        font-size: 0.875em;
+        margin-top: 5px;
+    }
+</style>

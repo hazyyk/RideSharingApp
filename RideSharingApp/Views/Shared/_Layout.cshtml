@@ -6,10 +6,12 @@
     <title>@ViewData["Title"] - RideSharingApp</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light border-bottom box-shadow mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">RideSharingApp</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -23,12 +25,18 @@
                         </li>
                         @if (User.Identity.IsAuthenticated)
                         {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="RideBooking" asp-action="Book">Book a Ride</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Driver" asp-action="Dashboard">Driver Dashboard</a>
-                            </li>
+                            @if (User.IsInRole("Customer"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="RideBooking" asp-action="Book">Book a Ride</a>
+                                </li>
+                            }
+                            @if (User.IsInRole("Driver"))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="Driver" asp-action="Dashboard">Driver Dashboard</a>
+                                </li>
+                            }
                         }
                     </ul>
                     <ul class="navbar-nav">
@@ -45,8 +53,18 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link text-dark dropdown-toggle" href="#" id="registerDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Register
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="registerDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Register" asp-route-role="customer">Register as Customer</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Register" asp-route-role="driver">Register as Driver</a>
+                                    </li>
+                                </ul>
                             </li>
                         }
                     </ul>
@@ -56,18 +74,51 @@
     </header>
     <div class="container">
         <main role="main" class="pb-3">
-            @RenderBody() <!-- This is the critical line -->
+            @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - RideSharingApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
+ 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <style>
+        body {
+            background: linear-gradient(to bottom, #e6f0fa, #c3cfe2);
+            min-height: 100vh;
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            margin: 0;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar-brand, .nav-link {
+            color: #333 !important;
+        }
+
+            .nav-link:hover {
+                color: #6a82fb !important;
+            }
+
+        .dropdown-menu {
+            background: #fff;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-item {
+            color: #333;
+        }
+
+            .dropdown-item:hover {
+                background: #e6f0fa;
+                color: #6a82fb;
+            }
+    </style>
 </body>
 </html>
