@@ -21,9 +21,6 @@ Database :  Microsoft SQL Server
 Steps up Instructions:
 
 1.Clone this git Repository: https://github.com/hazyyk/RideSharingApp.git
-
 2. Change the connection string in appsettings.json where Server=(local)\\SQLEXPRESS should be replaced with your server.
-
-3. Open Package Manager Console and Run: dotnet ef  database update --context RideSharingDbContext --project RideSharingApp
-
+3. Open Package Manager Console and Run: dotnet ef database update --context RideSharingDbContext --project RideSharingApp
 4. Press F5 to run the project.
