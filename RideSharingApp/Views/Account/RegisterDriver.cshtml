@@ -27,6 +27,12 @@
                     </div>
 
                     <div class="col-12 col-md-6">
+                        <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" aria-label="Phone number" aria-describedby="PhoneNumberValidation" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger" id="PhoneNumberValidation"></span>
+                    </div>
+
+                    <div class="col-12 col-md-6">
                         <label asp-for="Password" class="form-label">Password</label>
                         <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" autocomplete="new-password" aria-label="Password" aria-describedby="PasswordValidation" />
                         <span asp-validation-for="Password" class="text-danger" id="PasswordValidation"></span>
@@ -64,13 +70,13 @@
 
                     <div class="col-12 col-md-6">
                         <label asp-for="Capacity" class="form-label">Vehicle Capacity</label>
-                        <input asp-for="Capacity" class="form-control" placeholder="e.g., 4 passengers" aria-label="Vehicle capacity" aria-describedby="CapacityValidation" />
+                        <input asp-for="Capacity" class="form-control" placeholder="e.g., 4 passengers" type="number" aria-label="Vehicle capacity" aria-describedby="CapacityValidation" />
                         <span asp-validation-for="Capacity" class="text-danger" id="CapacityValidation"></span>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center gap-2 mt-4" id="registerButton">
+            <button id="registerButton" type="submit" class="btn btn-primary w-100 d-flex justify-content-center align-items-center gap-2 mt-4">
                 Register
                 <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
             </button>
@@ -90,17 +96,13 @@
                 var $button = $('#registerButton');
                 $button.find('.spinner-border').removeClass('d-none');
                 $button.prop('disabled', true);
+                console.log('Form submitted');
             });
 
-            // Real-time validation feedback
             $('input').on('input', function () {
                 var $input = $(this);
-                var $error = $input.next('.text-danger');
-                if ($input.valid()) {
-                    $input.css('border-color', '#28a745');
-                } else {
-                    $input.css('border-color', '#dc3545');
-                }
+                console.log('Input:', $input.attr('id'), 'Valid:', $input.valid());
+                $input.css('border-color', $input.valid() ? '#28a745' : '#dc3545');
             });
         });
     </script>
