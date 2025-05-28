@@ -1,1 +1,41 @@
-﻿just testing
+﻿Sample Inputs:
+
+``Sample Input of Register Forms for Customers:``
+
+Name: Nan Hnin Yai Kyi
+
+Email: 523k0051@student.tdtu.edu.vn
+
+Phone number : 0899330170
+
+sample password : MannDH12
+
+``Sample Input of Register Form for Drivers:``
+
+Name: Saw Harry
+
+Email: 523k0034@student.tdtu.edu.vn
+
+Phone number : 0899332221
+
+sample password : MannDH12
+
+License number : DL1234567890
+
+Vehicle Model: Toyota Corolla
+
+Vehicle Type: Sedan
+
+License Plate: ABC-1234
+
+Vehicle Capacity: 4 
+
+``Sample Book Riding Location``
+
+Current Location Name : TDTU
+
+Drop off Location Name : Coffee Shop
+Latitude:  10.7818
+
+Longitude: 106.685
+
